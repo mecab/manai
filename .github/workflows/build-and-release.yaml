@@ -23,8 +23,7 @@ jobs:
         draft: false
         prerelease: false
 
-  build-and-release:
-    needs: create-release
+  build:
     runs-on: ubuntu-latest
 
     strategy:
@@ -49,12 +48,31 @@ jobs:
     - name: Compress binary
       run: tar -czf manai-${{ matrix.target }}.tar.gz bin/
 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: manai-${{ matrix.target }}
+        path: manai-${{ matrix.target }}.tar.gz
+
+  release:
+    needs: [create-release, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [bun-linux-x64, bun-linux-arm64, bun-darwin-x64, bun-darwin-arm64]
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: manai-${{ matrix.target }}
+
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.release_id }}
-        asset_path: ./manai-${{ matrix.target }}.tar.gz
+        asset_path: manai-${{ matrix.target }}.tar.gz
         asset_name: manai-${{ matrix.target }}.tar.gz
         asset_content_type: application/gzip
