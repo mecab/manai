@@ -48,7 +48,7 @@ function manai() {
             --bind 'enter:execute(echo {3})+abort' \
             --with-nth=1,2 \
             --preview="$preview_command" \
-            --preview-window=bottom:40%:wrap
+            --preview-window=right:30%:wrap
     )
     zle kill-buffer
     zle -R

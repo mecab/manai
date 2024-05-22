@@ -1,15 +1,41 @@
-# manai
+manai
+=====
 
-To install dependencies:
+Prerequisites
+-------------
+- [Zsh](https://www.zsh.org/)
+- [fzf](https://github.com/junegunn/fzf)
 
-```bash
-bun install
-```
+Installation
+------------
 
-To run:
+1. Clone this package to somewhere you are comfortable with (e.g. `$HOME/.dotfiles/manai`)
 
-```bash
-bun run app.ts
-```
+    ```bash
+    $ git clone git@github.com:mecab/manai.git $HOME/.dotfiles/manai
+    ```
 
-This project was created using `bun init` in bun v1.1.8. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+2. Download manai binary
+
+    ```bash
+    $ $HOME/.dotfiles/manai/download-manai.zsh
+    ```
+
+3. Source `manai.zsh` in your zshrc then bind `manai` function to any keybind
+
+    ```bash
+    $ nano ~/.zshrc
+    ```
+
+    and add the following
+
+    ```
+    source $HOME/.dotfiles/manai.zsh
+    bindkey '\eh' manai
+    ```
+
+4. then reload your zshrc
+
+    ```bash
+    $ exec $SHELL -l
+    ```
