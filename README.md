@@ -7,6 +7,7 @@ Prerequisites
 -------------
 - [Zsh](https://www.zsh.org/)
 - [fzf](https://github.com/junegunn/fzf)
+- [OpenAI API Key](https://platform.openai.com)
 
 Installation
 ------------
@@ -23,7 +24,7 @@ Installation
     $ $HOME/.dotfiles/manai/download-manai.zsh
     ```
 
-3. Source `manai.zsh` in your zshrc then bind `manai` function to any keybind
+3. Source `manai.zsh` in your zshrc, set your `OPENAI_API_KEY` then bind `manai` function to any keybind
 
     ```bash
     $ nano ~/.zshrc
@@ -32,9 +33,12 @@ Installation
     and add the following
 
     ```
-    source $HOME/.dotfiles/manai.zsh
+    export OPENAI_API_KEY="your-openai-api-key"
+    source $HOME/.dotfiles/manai/manai.zsh
     bindkey '\eh' manai
     ```
+
+    Note: You can also specify `MANAI_OPENAI_API_KEY` instead of `OPENAI_AI_KEY` for `manai` exclusive use.
 
 4. then reload your zshrc
 
