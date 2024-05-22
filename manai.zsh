@@ -1,6 +1,6 @@
 __manai_base="$(dirname "${BASH_SOURCE:-$0}")"
 
-function format() {
+function __manai_format() {
     local GLAY='\033[30m'
     local WHITE='\033[37m'
     local NC='\033[0m'
@@ -9,13 +9,6 @@ function format() {
         IFS=$'\t' read -r -A columns <<< "$line"
         printf "${WHITE}%s${NC}\t${GLAY}%s${NC}\t%s\n" "${columns[1]}" "${columns[2]}" "${(j/\t/)columns[@]:2}"
     done
-}
-
-function format_preview() {
-    local BLUE='\033[34m'
-    local NC='\033[0m'
-
-    echo -ne "${BLUE}\{2}${NC}\\n\\n{3}\\n"
 }
 
 function manai() {
@@ -48,7 +41,7 @@ function manai() {
     local preview_command="printf '${BLUE}%s${NC}\n\n%s' {2} {3}"
     # result=$( cat $HOME/tmp/out.txt |
     result=$(OPENAI_API_KEY="${OPENAI_API_KEY}" "${__manai_base}/bin/manai" "$subcommand" "$requirement" |
-        format |
+        __manai_format |
         fzf --ansi \
             --delimiter='\t' \
             --layout=reverse \
@@ -63,4 +56,3 @@ function manai() {
     zle end-of-line
 }
 zle -N manai
-bindkey '\eh' manai
