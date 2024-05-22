@@ -33,6 +33,7 @@ jobs:
 
     - name: Create Release
       id: create_release
+      if: ${{ !env.RELEASE_ID }}
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,13 +43,24 @@ jobs:
         draft: false
         prerelease: false
 
+    - name: Get Release ID
+      if: ${{ !env.RELEASE_ID }}
+      run: echo "RELEASE_ID=${{ steps.create_release.outputs.id }}" >> $GITHUB_ENV
+
+    - name: Get Existing Release ID
+      if: ${{ env.RELEASE_ID == '' }}
+      run: |
+        RELEASE_ID=$(gh release list --limit 1 --json id --jq '.[0].id')
+        echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Upload Release Asset
-      id: upload-release-asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
         asset_path: ./manai-${{ matrix.target }}.tar.gz
         asset_name: manai-${{ matrix.target }}.tar.gz
         asset_content_type: application/gzip
