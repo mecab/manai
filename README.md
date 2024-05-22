@@ -1,6 +1,8 @@
 manai
 =====
 
+![demo](doc/img/demo.gif)
+
 Prerequisites
 -------------
 - [Zsh](https://www.zsh.org/)
