@@ -1,0 +1,19 @@
+{
+  "name": "manai",
+  "module": "app.ts",
+  "bin": "app.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "pkg": "^5.8.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "openai": "^4.47.1"
+  },
+  "scripts": {
+    "build": "bun build ./app.ts --outfile bin/manai --target bun"
+  }
+}
