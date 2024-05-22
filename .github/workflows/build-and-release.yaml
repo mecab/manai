@@ -6,7 +6,25 @@ on:
       - '*'
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
   build-and-release:
+    needs: create-release
     runs-on: ubuntu-latest
 
     strategy:
@@ -31,36 +49,12 @@ jobs:
     - name: Compress binary
       run: tar -czf manai-${{ matrix.target }}.tar.gz bin/
 
-    - name: Create Release
-      id: create_release
-      if: ${{ !env.RELEASE_ID }}
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: Get Release ID
-      if: ${{ !env.RELEASE_ID }}
-      run: echo "RELEASE_ID=${{ steps.create_release.outputs.id }}" >> $GITHUB_ENV
-
-    - name: Get Existing Release ID
-      if: ${{ env.RELEASE_ID == '' }}
-      run: |
-        RELEASE_ID=$(gh release list --limit 1 --json id --jq '.[0].id')
-        echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
+        upload_url: ${{ needs.create-release.outputs.release_id }}
         asset_path: ./manai-${{ matrix.target }}.tar.gz
         asset_name: manai-${{ matrix.target }}.tar.gz
         asset_content_type: application/gzip
