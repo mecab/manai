@@ -5,12 +5,14 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/diff": "^5.2.1",
     "pkg": "^5.8.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "diff": "^5.2.0",
     "openai": "^4.47.1"
   },
   "scripts": {

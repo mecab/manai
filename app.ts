@@ -1,5 +1,11 @@
 import readline from 'readline';
+import * as Diff from 'diff';
 import OpenAI from 'openai';
+
+// TODO: Better markers for diff e.g. invisible unicode characters
+const ADD_START='追追追';
+const DEL_START='削削削';
+const DIFF_END='終終終';
 
 function question(query: string): Promise<string> {
     const rl = readline.createInterface({
@@ -33,10 +39,35 @@ function buildPrompt(partialCommand: string, requirement: string): string {
     - description: A description of the modification
     - full_command: The complete command line.
 
-    The command_part should align as closely as possible with the partial command line, reflecting the differences. For instance, if the partial command is empty, command_part would be the same as the full_command.
+    First, you think the full_command to satisfy the requirements. Then you can think command_part where highlights the most important parts of your modification. Finally, you can write a description of the modification.
+    Please output only command_part is relevant suggestion to the requirements.
 
-    Strictrly maintain the order of the columns. Only use this format for the output. Do not enclose the output in a Markdown code block.`;
+    Strictly maintain the order of the columns. Only use this format for the output. Do not enclose the output in a Markdown code block.`;
     return prompt;
+}
+
+function processDiff(partialCommand: string, completeCommand: string): string {   
+    const diffColoredStr = Diff.diffWordsWithSpace(partialCommand, completeCommand, {ignoreWhitespace: true}).map(part => {
+        if (part.added) {
+            return `${ADD_START}${part.value}${DIFF_END}`;
+        }
+        if (part.removed) {
+            return `${DEL_START}${part.value}${DIFF_END}`;
+        }
+        return part.value;
+    }).join('');
+
+    return diffColoredStr;
+}
+
+function toTsv(partialCommand: string, aiLine: string): string {
+    // just in case AI outputs more than four fields, we concats the rest as completeCommand
+    const [commandPart, description, ...rest] = aiLine.split('@@@');
+    const completeCommand = rest.join('');
+    const diffColoredStr = processDiff(partialCommand, completeCommand);
+    const tsv = [commandPart, description, completeCommand, diffColoredStr].join('\t');
+
+    return tsv
 }
 
 async function main() {
@@ -60,7 +91,8 @@ async function main() {
     // console.log(filteredLines?.join('\n'));
 
     let buffer: string = "";
-    stream.on('content', (contentDelta, contentSnapshot) => {
+
+    stream.on('content', (contentDelta) => {
         buffer += contentDelta;
         const lines = buffer.split('\n');
         const completeLines = lines.slice(0, -1);
@@ -70,23 +102,16 @@ async function main() {
             if (line.length === 0) {
                 continue;
             }
-            const tsv = line.replaceAll('@@@', '\t');
-            console.log(tsv);
+
+            console.log(toTsv(partialCommand, line));
         }
 
         buffer = incompleteLine;
     });
-    
-    try {
-        await stream.finalContent();
-    } catch (e) {
-        console.error(e);
-        process.exit(1);
-    }
 
+    await stream.finalContent();
     if (buffer.length > 0) {
-        const tsv = buffer.replaceAll('@@@', '\t');
-        console.log(tsv);
+        console.log(toTsv(partialCommand, buffer));
     }
 }
 

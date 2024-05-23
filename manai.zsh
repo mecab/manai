@@ -7,8 +7,12 @@ function __manai_format() {
 
     while read line; do
         IFS=$'\t' read -r -A columns <<< "$line"
-        printf "${WHITE}%s${NC}\t${GLAY}%s${NC}\t%s\n" "${columns[1]}" "${columns[2]}" "${(j/\t/)columns[@]:2}"
+        printf "${WHITE}%s${NC}\t${GLAY}%s${NC}\t%b\t%b\n" "${columns[1]}" "${columns[2]}" "${columns[3]}" "${columns[4]}"
     done
+}
+
+function __manai_preview_format() {
+    echo "$1" | sed "s/あ/\x1b[32m/g; s/い/\x1b[31m/g; s/う/\x1b[0m/g"
 }
 
 function manai() {
@@ -38,7 +42,7 @@ function manai() {
         return
     fi
 
-    local preview_command="printf '${BLUE}%s${NC}\n\n%s' {2} {3}"
+    local preview_command="${__manai_base}/lib/manai-preview-format.zsh {2} {4}"
     # result=$( cat $HOME/tmp/out.txt |
     result=$(OPENAI_API_KEY="${OPENAI_API_KEY}" "${__manai_base}/bin/manai" "$subcommand" "$requirement" |
         __manai_format |
