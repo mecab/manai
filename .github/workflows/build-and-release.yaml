@@ -9,20 +9,35 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     outputs:
-      release_id: ${{ steps.create_release.outputs.id }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_id: ${{ steps.set_release_output.outputs.id }}
+      upload_url: ${{ steps.set_release_output.outputs.upload_url }}
 
     steps:
+    - name: Get Release
+      id: get_release
+      uses: joutvhu/get-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Create Release
       id: create_release
+      if: ${{ steps.get_release.outputs.id == '' }}
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
+
+    - name: Set Release Output
+      id: set_release_output
+      run: |
+        echo "id=${{ steps.get_release.outputs.id || steps.create_release.outputs.id }}" >> $GITHUB_OUTPUT
+        echo "upload_url=${{ steps.get_release.outputs.upload_url || steps.create_release.outputs.upload_url }}" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
@@ -67,6 +82,21 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: manai-${{ matrix.target }}
+
+    - name: Get Release Assets
+      id: get_assets
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        assets=$(gh api /repos/${{ github.repository }}/releases/${{ needs.create-release.outputs.release_id }}/assets | jq -r '.[] | select(.name == "manai-${{ matrix.target }}.tar.gz") | .id')
+        echo "assets=${assets}" >> $GITHUB_OUTPUT
+
+    - name: Delete Existing Asset
+      if: ${{ steps.get_assets.outputs.assets != '' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh api /repos/${{ github.repository }}/releases/assets/${{ steps.get_assets.outputs.assets }} -X DELETE
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
