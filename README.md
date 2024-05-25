@@ -1,5 +1,10 @@
 manai
 =====
+<div align="center">
+    <img src="doc/img/logo.svg" width="480">
+</div>
+
+manai is an AI powered interactive command line completion for Zsh. Hotkey to trigger and ask anything about your work-in-progress command line.
 
 ![demo](doc/img/demo.gif)
 
@@ -35,6 +40,8 @@ Installation
     ```
     export OPENAI_API_KEY="your-openai-api-key"
     source $HOME/.dotfiles/manai/manai.zsh
+
+    # bind to `Alt-h`. Update this to your preference!
     bindkey '\eh' manai
     ```
 
