@@ -1,13 +1,12 @@
 __manai_base="$(dirname "${BASH_SOURCE:-$0}")"
 
 function __manai_format() {
-    local GLAY='\033[30m'
     local WHITE='\033[37m'
     local NC='\033[0m'
 
     while read line; do
         IFS=$'\t' read -r -A columns <<< "$line"
-        printf "${WHITE}%s${NC}\t${GLAY}%s${NC}\t%b\t%b\n" "${columns[1]}" "${columns[2]}" "${columns[3]}" "${columns[4]}"
+        printf "${WHITE}%s${NC}\t%s\t%s\t%b\n" "${columns[1]}" "${columns[2]}" "${columns[3]}" "${columns[4]}"
     done
 }
 
@@ -49,10 +48,10 @@ function manai() {
         fzf --ansi \
             --delimiter='\t' \
             --layout=reverse \
-            --bind 'enter:execute(echo {3})+abort' \
-            --with-nth=1,2 \
+            --bind 'enter:execute(echo -E {3})+abort' \
+            --with-nth=1 \
             --preview="$preview_command" \
-            --preview-window=right:30%:wrap
+            --preview-window=right:40%:wrap
     )
     zle kill-buffer
     zle -R
