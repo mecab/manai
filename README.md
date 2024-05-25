@@ -23,7 +23,7 @@ Installation
     $ git clone git@github.com:mecab/manai.git $HOME/.dotfiles/manai
     ```
 
-2. Download manai binary
+2. Download manai binary (why?/you don't trust the binary? see [Build Manai Binary by Yourself](#build-manai-binary-by-yourself))
 
     ```bash
     $ $HOME/.dotfiles/manai/download-manai.zsh
@@ -52,3 +52,28 @@ Installation
     ```bash
     $ exec $SHELL -l
     ```
+
+Build Manai Binary by Yourself
+------------------------------
+
+Manai uses a binary executable to process the output from ChatGPT because it is difficult to handle the streamed output using only shell scripts. For convenience, pre-built binaries are distributed, but you can also build it yourself. It is written in TypeScript and can be compiled if you have Bun installed.
+
+1. Install JS Dependencies
+    
+    ```bash
+    $ cd $HOME/.dotfiles/manai
+    $ bun install
+    ```
+
+2. Build the binary
+
+    ```bash
+    $ bun run build
+    ```
+
+    It should generate `bin/manai` binary for your architecture.
+
+Why "Manai"?
+-------------
+- man + AI
+- (悩)まない (naya)manai - "worry-free" in Japanese
