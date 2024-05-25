@@ -5,8 +5,7 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/diff": "^5.2.1",
-    "pkg": "^5.8.1"
+    "@types/diff": "^5.2.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
