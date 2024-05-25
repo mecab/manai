@@ -16,6 +16,6 @@
     "openai": "^4.47.1"
   },
   "scripts": {
-    "build": "bun build ./app.ts --outfile bin/manai --target bun"
+    "build": "bun build ./app.ts --compile --outfile bin/manai --target bun"
   }
 }
