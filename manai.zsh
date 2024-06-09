@@ -10,10 +10,6 @@ function __manai_format() {
     done
 }
 
-function __manai_preview_format() {
-    echo "$1" | sed "s/あ/\x1b[32m/g; s/い/\x1b[31m/g; s/う/\x1b[0m/g"
-}
-
 function manai() {
     local BLUE='\e[34m'
     local NC='\e[0m'
