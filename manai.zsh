@@ -16,6 +16,20 @@ function manai() {
 
     local OPENAI_API_KEY=${MANAI_OPENAI_API_KEY:-"$OPENAI_API_KEY"}
 
+    # Check if fzf version is 0.38 or later and if so, use the new `become` feature.
+    # Specifically, fzf 0.53.0 or later must use execute (https://github.com/junegunn/fzf/issues/3845)
+
+    # `fzf --version` output is like `0.53.0 (c4a9ccd)` but some people might alias fzf to `fzf-tmux`.
+    # `fzf-tmux --version` output is like `fzf-tmux (with fzf 0.53.0 (c4a9ccd))` so we need to extract the version number first.
+
+    # fzf_version is an array of 3 integers: major, minor, patch
+    local fzf_version=($(fzf --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | awk -F. '{printf "%d %d %d", $1, $2, $3}'))
+    if [[ $fzf_version[1] -gt 0 ]] || [[ $fzf_version[2] -ge 38 ]]; then
+        local bind_command='enter:become(echo -E {3})'
+    else
+        local bind_command='enter:execute(echo -E {3})+abort'
+    fi
+
     autoload -Uz read-from-minibuffer
     subcommand=$BUFFER
 
@@ -44,7 +58,7 @@ function manai() {
         fzf --ansi \
             --delimiter='\t' \
             --layout=reverse \
-            --bind 'enter:execute(echo -E {3})+abort' \
+            --bind="$bind_command" \
             --with-nth=1 \
             --preview="$preview_command" \
             --preview-window=right:40%:wrap
